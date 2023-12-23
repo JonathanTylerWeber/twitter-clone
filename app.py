@@ -5,7 +5,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, Likes
 import pdb
 
 CURR_USER_KEY = "curr_user"
@@ -156,7 +156,8 @@ def users_show(user_id):
                 .order_by(Message.timestamp.desc())
                 .limit(100)
                 .all())
-    return render_template('users/show.html', user=user, messages=messages)
+    likes = [like.message_id for like in Likes.query.filter_by(user_id=g.user.id).all()]
+    return render_template('users/show.html', user=user, messages=messages, likes=likes)
 
 
 @app.route('/users/<int:user_id>/following')
@@ -249,6 +250,22 @@ def delete_user():
 
     return redirect("/signup")
 
+@app.route('/users/add_like/<int:msg_id>', methods=["POST"])
+def like_message(msg_id):
+    msg = Message.query.get_or_404(msg_id)
+    new_like = Likes(user_id=g.user.id, message_id=msg.id)
+    db.session.add(new_like)
+    db.session.commit()
+    return redirect('/')
+
+@app.route('/users/delete_like/<int:msg_id>', methods=["POST"])
+def delete_like(msg_id):
+    like = Likes.query.filter_by(message_id=msg_id).first()
+    db.session.delete(like)
+    db.session.commit()
+    return redirect('/')
+        
+
 
 ##############################################################################
 # Messages routes:
@@ -327,8 +344,10 @@ def homepage():
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
+        
+        likes = [like.message_id for like in Likes.query.filter_by(user_id=g.user.id).all()]
 
-        return render_template('home.html', messages=messages)
+        return render_template('home.html', messages=messages, likes=likes)
 
     else:
         return render_template('home-anon.html')
