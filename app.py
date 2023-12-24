@@ -12,6 +12,7 @@ CURR_USER_KEY = "curr_user"
 
 app = Flask(__name__)
 
+
 # Get DB_URI from environ variable (useful for production/testing) or,
 # if not set there, use development local db.
 app.config['SQLALCHEMY_DATABASE_URI'] = (
@@ -25,6 +26,8 @@ toolbar = DebugToolbarExtension(app)
 
 connect_db(app)
 
+if __name__ == '__main__':
+    db.create_all()
 
 ##############################################################################
 # User signup/login/logout
@@ -265,6 +268,18 @@ def delete_like(msg_id):
     db.session.commit()
     return redirect('/')
         
+@app.route('/users/<int:user_id>/likes')
+def users_likes(user_id):
+    """Show list of likes of this user."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    user = User.query.get_or_404(user_id)
+    likes = Likes.query.filter_by(user_id=user_id).all()
+    return render_template('users/likes.html', user=user, likes=likes)
+
 
 
 ##############################################################################

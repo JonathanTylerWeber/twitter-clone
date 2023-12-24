@@ -44,8 +44,17 @@ class Likes(db.Model):
 
     message_id = db.Column(
         db.Integer,
-        db.ForeignKey('messages.id', ondelete='cascade'),
-        unique=True
+        db.ForeignKey('messages.id', ondelete='cascade')
+    )
+
+    user = db.relationship(
+        'User',
+        backref='user_likes'
+    )
+
+    message = db.relationship(
+        'Message',
+        backref='likes'
     )
 
 
@@ -137,7 +146,7 @@ class User(db.Model):
         Hashes password and adds user to system.
         """
 
-        hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
+        hashed_pwd = bcrypt.generate_password_hash(password).decode('utf-8')
 
         user = User(
             username=username,
