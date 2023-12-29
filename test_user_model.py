@@ -10,8 +10,7 @@ from unittest import TestCase
 
 from models import db, User, Message, Follows
 from flask_bcrypt import Bcrypt
-from sqlalchemy.exc import IntegrityError, InvalidRequestError
-
+from sqlalchemy import exc
 
 # BEFORE we import our app, let's set an environmental variable
 # to use a different database for tests (we need to do this
@@ -43,6 +42,11 @@ class UserModelTestCase(TestCase):
         Follows.query.delete()
 
         self.client = app.test_client()
+
+    def tearDown(self):
+        res = super().tearDown()
+        db.session.rollback()
+        return res
 
     def test_user_model(self):
         """Does basic model work?"""
@@ -107,29 +111,26 @@ class UserModelTestCase(TestCase):
         self.assertNotEqual(new_user.password, password)
         self.assertTrue(bcrypt.check_password_hash(new_user.password, password))
 
-    FIXME:
-    def test_signup_with_invalid_data(self):
-        # Create a user with valid data
-        username = 'testuser'
-        email = 'testuser@example.com'
-        password = 'password123'
-        User.signup(username, email, password, None)
-        db.session.commit()
-
-        # Try to create a new user with the same username
-        with self.assertRaises(IntegrityError):
-            User.signup(username, 'duplicate@example.com', 'password456', None)
+    def test_invalid_username_signup(self):
+        invalid = User.signup(None, "test@test.com", "password", None)
+        uid = 123456789
+        invalid.id = uid
+        with self.assertRaises(exc.IntegrityError) as context:
             db.session.commit()
 
-        # Try to create a new user with the same email
-        with self.assertRaises(IntegrityError):
-            User.signup('duplicateuser', email, 'password789', None)
+    def test_invalid_email_signup(self):
+        invalid = User.signup("testtest", None, "password", None)
+        uid = 123789
+        invalid.id = uid
+        with self.assertRaises(exc.IntegrityError) as context:
             db.session.commit()
-
-        # Try to create a new user with missing required fields
-        with self.assertRaises(ValueError):
-            User.signup(None, 'missing@example.com', None, None)
-            db.session.commit()
+    
+    def test_invalid_password_signup(self):
+        with self.assertRaises(ValueError) as context:
+            User.signup("testtest", "email@email.com", "", None)
+        
+        with self.assertRaises(ValueError) as context:
+            User.signup("testtest", "email@email.com", None, None)
 
     def test_authenticate_with_valid_credentials(self):
         # Create a new user with valid credentials
