@@ -37,10 +37,10 @@ python-dateutil==2.7.3
 simplegeneric==0.8.1
 six==1.11.0
 soupsieve==2.4.1
-SQLAlchemy==2.0.25
+SQLAlchemy==1.2.12
 text-unidecode==1.2
 traitlets==4.3.2
-typing_extensions==4.7.1
+typing-extensions==4.7.1
 wcwidth==0.1.7
 Werkzeug==0.14.1
 WTForms==2.2.1
