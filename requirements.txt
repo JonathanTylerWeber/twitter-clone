@@ -11,7 +11,7 @@ Faker==0.9.1
 Flask==1.0.2
 Flask-Bcrypt==0.7.1
 Flask-DebugToolbar==0.10.1
-Flask-SQLAlchemy==1.0
+Flask-SQLAlchemy==2.3.2
 Flask-WTF==0.14.2
 greenlet==3.0.3
 gunicorn==21.2.0
@@ -37,7 +37,7 @@ python-dateutil==2.7.3
 simplegeneric==0.8.1
 six==1.11.0
 soupsieve==2.4.1
-SQLAlchemy==2.0.25
+SQLAlchemy==1.4.0
 text-unidecode==1.2
 traitlets==4.3.2
 typing_extensions==4.7.1
